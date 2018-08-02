@@ -1,6 +1,8 @@
 package com.elkhamitech.hajjhackproject.view;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -12,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,6 +39,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -61,10 +66,15 @@ public class MainActivity extends AppCompatActivity
     private GoogleMap mMap;
     private LocationManager locationManager;
     private LocationListener locationListener;
-    private Operator operator;
     private MyMarker myMarker;
     private String topic;
+    private String topic2;
     private MqttAndroidClient client;
+    private Circle mCircle;
+    String myTopic = "Zone1/SubZone1/UnitID1/Medic/Req";
+    String pTopic = "Zone1/SubZone1/UnitID1/Medic/Resp";
+    Marker markerName;
+    boolean xyz = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,9 +83,8 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        operator = new Operator();
+        myMarker = new MyMarker();
         loadFromIOT();
-
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -91,7 +100,6 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
 
     }
 
@@ -110,8 +118,9 @@ public class MainActivity extends AppCompatActivity
 
     private void loadFromIOT() {
 
-        String myTopic = "Zone1/SubZone1/UnitID1/Medic";
+
         topic = myTopic;
+        topic2 = pTopic;
 
         String clientId = MqttClient.generateClientId();
         client = new MqttAndroidClient(getApplicationContext(),"tcp://broker.mqttdashboard.com:1883",clientId);
@@ -122,16 +131,16 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
                     Log.d("LOOk", "onSuccess");
-                    Toast.makeText(getApplicationContext(), "Connected",
-                            Toast.LENGTH_LONG).show();
+//                    Toast.makeText(getApplicationContext(), "Connected",
+//                            Toast.LENGTH_LONG).show();
                     setSubscription();
                 }
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
                     Log.d("LOOK", "onFailure");
-                    Toast.makeText(getApplicationContext(), "Failed",
-                            Toast.LENGTH_LONG).show();
+//                    Toast.makeText(getApplicationContext(), "Failed",
+//                            Toast.LENGTH_LONG).show();
                 }
 
             });
@@ -153,34 +162,31 @@ public class MainActivity extends AppCompatActivity
 
                 String str = (new String(message.getPayload()));
                 String[] splited = str.split(",");
+                Toast.makeText(MainActivity.this, str, Toast.LENGTH_SHORT).show();
 
 //                for(int i = 0; i < splited.length; i++){
 //                    Toast.makeText(MainActivity.this, splited[i].toString(), Toast.LENGTH_SHORT).show();
 //                }
-
-                myMarker = new MyMarker();
                 myMarker.setLat(splited[0]);
                 myMarker.setLon(splited[1]);
                 myMarker.setRFid(splited[2]);
                 myMarker.setUnitId(splited[3]);
 
-                Toast.makeText(MainActivity.this, myMarker.getLat()+myMarker.getLon(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, myMarker.getLat()+myMarker.getLon(), Toast.LENGTH_SHORT).show();
 
                 centerMapLocation(Double.valueOf(myMarker.getLat()),Double.valueOf(myMarker.getLon()),myMarker.getUnitId(),BitmapDescriptorFactory.HUE_RED);
 
 
                 LatLng currentLocation = new LatLng(Double.valueOf(myMarker.getLat()),Double.valueOf(myMarker.getLon()));
+                markerName = mMap.addMarker(new MarkerOptions().position(currentLocation).title(myMarker.getUnitId()));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 19));
-
+                xyz = true;
 
                 mMap.setInfoWindowAdapter(new PopupAdapter(getLayoutInflater()));
 
                 mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                     @Override
                     public void onInfoWindowClick(Marker marker) {
-
-//                            Intent intent = new Intent(MainActivity.this,LoginActivity.class);
-//                            startActivity(intent);
 
                         marker.showInfoWindow();
 
@@ -200,6 +206,11 @@ public class MainActivity extends AppCompatActivity
     public void setSubscription(){
         try {
             client.subscribe(topic, 0);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+        try {
+          client.subscribe(topic2, 0);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -276,8 +287,20 @@ public class MainActivity extends AppCompatActivity
 
             mMap.setMyLocationEnabled(true);
 
-//            centerMapLocation(lastKnownLocation,"Operator Name");
         }
+    }
+
+
+    private void drawMarkerWithCircle(LatLng position){
+        double radiusInMeters = 1.0;
+        int strokeColor = 0xffff0000; //red outline
+        int shadeColor = 0x44ff0000; //opaque red fill
+
+        CircleOptions circleOptions = new CircleOptions().center(position).radius(radiusInMeters).fillColor(shadeColor).strokeColor(strokeColor).strokeWidth(8);
+        mCircle = mMap.addCircle(circleOptions);
+
+//        MarkerOptions markerOptions = new MarkerOptions().position(position);
+//        mMarker = mMap.addMarker(markerOptions);
     }
 
 
@@ -312,6 +335,7 @@ public class MainActivity extends AppCompatActivity
         //BitmapDescriptorFactory.HUE_GREEN
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
 
+
     }
 
     @Override
@@ -323,24 +347,41 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onLocationChanged(Location location) {
 
-
                 double lat = location.getLatitude();
                 double lon = location.getLongitude();
 
                 LatLng currentLocation = new LatLng(lat, lon);
 
+//              mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+
+                float[] distance = new float[2];
+
+                drawMarkerWithCircle(currentLocation);
+
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
 
-//                mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+                    Location.distanceBetween(21.486254,  39.192989,
+                            mCircle.getCenter().latitude, mCircle.getCenter().longitude, distance);
 
-                Location target = new Location("target");
-                for(LatLng point : new LatLng[]{POINTA, POINTB, POINTC, POINTD}) {
-                    target.setLatitude(point.latitude);
-                    target.setLongitude(point.longitude);
-                    if(location.distanceTo(target) < METERS_100) {
-                        // bingo!
+                    if( distance[0] > mCircle.getRadius()  ){
+//                        Toast.makeText(getBaseContext(), "Outside", Toast.LENGTH_LONG).show();
+
+                    } else {
+
+                        String message = "Done";
+                        try {
+                            client.publish(pTopic, message.getBytes(), 0,false);
+//                            Toast.makeText(getApplicationContext(),"Sent",Toast.LENGTH_LONG).show();
+
+
+
+                        } catch ( MqttException e) {
+                            e.printStackTrace();
+
+                        }
+//                        Toast.makeText(getBaseContext(), "Inside", Toast.LENGTH_LONG).show();
                     }
-                }
+
 
             }
 
@@ -391,7 +432,6 @@ public class MainActivity extends AppCompatActivity
         m4.setLon("39.192989");
         m4.setUnitId("M4");
         m4.setRFid("");
-
 
 
         ArrayList<MyMarker> markersArray = new ArrayList<MyMarker>();
