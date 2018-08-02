@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "1000344093508",
+    "firebase_url": "https://hajjhackproject.firebaseio.com",
+    "project_id": "hajjhackproject",
+    "storage_bucket": "hajjhackproject.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1000344093508:android:6c104427cacd3c03",
+        "android_client_info": {
+          "package_name": "com.elkhamitech.hajjhackproject"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1000344093508-43ppq0pag37it8e05vf2froqjqm4orlj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.elkhamitech.hajjhackproject",
+            "certificate_hash": "8d8673a5d28cc5fce89fcac3a760501f6bf0ecef"
+          }
+        },
+        {
+          "client_id": "1000344093508-sjd63ohm0ror1dlr3iincrahe9bbq8sd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAN1XWxXKyTgNXggQLBPNYgBrVD3_C50nM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1000344093508-sjd63ohm0ror1dlr3iincrahe9bbq8sd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
