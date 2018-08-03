@@ -83,6 +83,8 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        setTitle("SOS Box");
+
         myMarker = new MyMarker();
         loadFromIOT();
 
@@ -166,13 +168,11 @@ public class MainActivity extends AppCompatActivity
 
                 String str = (new String(message.getPayload()));
                 String[] splited = str.split(",");
-                Toast.makeText(MainActivity.this, str, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, str, Toast.LENGTH_SHORT).show();
 
 //                for(int i = 0; i < splited.length; i++){
 //                    Toast.makeText(MainActivity.this, splited[i].toString(), Toast.LENGTH_SHORT).show();
 //                }
-
-                xyz = true;
                 myMarker.setLat(splited[0]);
                 myMarker.setLon(splited[1]);
                 myMarker.setRFid(splited[2]);
@@ -193,7 +193,8 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onInfoWindowClick(Marker marker) {
 
-                        marker.showInfoWindow();
+//                        marker.showInfoWindow();
+                        marker.hideInfoWindow();
 
                     }
                 });
