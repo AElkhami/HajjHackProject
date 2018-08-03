@@ -103,10 +103,6 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        if(xyz){
-            markerName.remove();
-        }
-
     }
 
     @Override
@@ -182,6 +178,7 @@ public class MainActivity extends AppCompatActivity
 
                 centerMapLocation(Double.valueOf(myMarker.getLat()),Double.valueOf(myMarker.getLon()),myMarker.getUnitId(),BitmapDescriptorFactory.HUE_RED);
 
+                xyz = true;
 
                 LatLng currentLocation = new LatLng(Double.valueOf(myMarker.getLat()),Double.valueOf(myMarker.getLon()));
                 markerName = mMap.addMarker(new MarkerOptions().position(currentLocation).title(myMarker.getUnitId()));
@@ -195,6 +192,7 @@ public class MainActivity extends AppCompatActivity
 
 //                        marker.showInfoWindow();
                         marker.hideInfoWindow();
+                        xyz = true;
 
                     }
                 });
@@ -277,7 +275,7 @@ public class MainActivity extends AppCompatActivity
 
 
     private void drawMarkerWithCircle(LatLng position){
-        double radiusInMeters = 1.0;
+        double radiusInMeters = 15.0;
         int strokeColor = 0xffff0000; //red outline
         int shadeColor = 0x44ff0000; //opaque red fill
 
@@ -354,9 +352,7 @@ public class MainActivity extends AppCompatActivity
                     } else {
 
                         String message = "Done";
-                        if(xyz){
-                            markerName.remove();
-                        }
+
 
                         try {
                             client.publish(pTopic, message.getBytes(), 0,false);
@@ -370,6 +366,13 @@ public class MainActivity extends AppCompatActivity
 
                         }
 //                        Toast.makeText(getBaseContext(), "Inside", Toast.LENGTH_LONG).show();
+                        if(xyz){
+//                            markerName.remove();
+
+                            mMap.clear();
+                            viewZonePins(mMap);
+
+                        }
                     }
 
 
