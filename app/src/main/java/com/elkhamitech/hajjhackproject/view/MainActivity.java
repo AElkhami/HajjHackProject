@@ -366,13 +366,12 @@ public class MainActivity extends AppCompatActivity
 
                         }
 //                        Toast.makeText(getBaseContext(), "Inside", Toast.LENGTH_LONG).show();
-                        if(xyz){
-//                            markerName.remove();
 
+//                            markerName.remove();
                             mMap.clear();
                             viewZonePins(mMap);
 
-                        }
+
                     }
 
 
