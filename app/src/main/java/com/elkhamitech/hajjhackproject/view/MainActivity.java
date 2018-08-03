@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity
     private String topic2;
     private MqttAndroidClient client;
     private Circle mCircle;
-    String myTopic = "Zone1/SubZone1/UnitID1/Medic/Req";
+    String myTopic = "Zone1/SubZone1/UnitID2/Medic/Req";
     String pTopic = "Zone1/SubZone1/UnitID1/Medic/Resp";
     Marker markerName;
     boolean xyz = false;
@@ -100,6 +100,10 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        if(xyz){
+            markerName.remove();
+        }
 
     }
 
@@ -167,6 +171,8 @@ public class MainActivity extends AppCompatActivity
 //                for(int i = 0; i < splited.length; i++){
 //                    Toast.makeText(MainActivity.this, splited[i].toString(), Toast.LENGTH_SHORT).show();
 //                }
+
+                xyz = true;
                 myMarker.setLat(splited[0]);
                 myMarker.setLon(splited[1]);
                 myMarker.setRFid(splited[2]);
@@ -180,7 +186,6 @@ public class MainActivity extends AppCompatActivity
                 LatLng currentLocation = new LatLng(Double.valueOf(myMarker.getLat()),Double.valueOf(myMarker.getLon()));
                 markerName = mMap.addMarker(new MarkerOptions().position(currentLocation).title(myMarker.getUnitId()));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 19));
-                xyz = true;
 
                 mMap.setInfoWindowAdapter(new PopupAdapter(getLayoutInflater()));
 
@@ -226,27 +231,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -369,9 +353,14 @@ public class MainActivity extends AppCompatActivity
                     } else {
 
                         String message = "Done";
+                        if(xyz){
+                            markerName.remove();
+                        }
+
                         try {
                             client.publish(pTopic, message.getBytes(), 0,false);
 //                            Toast.makeText(getApplicationContext(),"Sent",Toast.LENGTH_LONG).show();
+
 
 
 
